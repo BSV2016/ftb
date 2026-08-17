@@ -1,3 +1,17 @@
 {
-  "name":"ftb-tournament-platform","version":"0.2.0","private":true,"type":"module","scripts":{"start":"node src/index.js"},"dependencies":{"express":"^5.1.0","helmet":"^8.1.0","express-rate-limit":"^8.0.1","pg":"^8.16.3","node-telegram-bot-api":"^0.66.0","pdfkit":"^0.17.1"}
+  "name": "ftb-tournament-platform",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "express-rate-limit": "^8.0.1",
+    "pg": "^8.16.3",
+    "node-telegram-bot-api": "^1.2.0",
+    "pdfkit": "^0.17.1"
+  }
 }
