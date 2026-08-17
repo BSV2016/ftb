@@ -10,9 +10,9 @@ export async function migrate() {
       description text NOT NULL DEFAULT '',
       sport_name varchar(80) NOT NULL DEFAULT 'Flunkyball',
       logo text,
-      primary_color varchar(7) NOT NULL DEFAULT '#16324F',
-      secondary_color varchar(7) NOT NULL DEFAULT '#FFFFFF',
-      accent_color varchar(7) NOT NULL DEFAULT '#F4B942',
+      primary_color varchar(7) NOT NULL DEFAULT '#15803D',
+      secondary_color varchar(7) NOT NULL DEFAULT '#111111',
+      accent_color varchar(7) NOT NULL DEFAULT '#FFFFFF',
       rules text NOT NULL DEFAULT '',
       rules_html text NOT NULL DEFAULT '',
       ticker text NOT NULL DEFAULT '',
@@ -21,6 +21,7 @@ export async function migrate() {
       tournament_finished boolean NOT NULL DEFAULT false,
       final_mode varchar(10) NOT NULL DEFAULT 'single',
       knockout_size int,
+      onboarding_done boolean NOT NULL DEFAULT false,
       version bigint NOT NULL DEFAULT 1,
       updated_at timestamptz NOT NULL DEFAULT now()
     );
@@ -32,41 +33,25 @@ export async function migrate() {
     ALTER TABLE settings ADD COLUMN IF NOT EXISTS tournament_finished boolean NOT NULL DEFAULT false;
     ALTER TABLE settings ADD COLUMN IF NOT EXISTS final_mode varchar(10) NOT NULL DEFAULT 'single';
     ALTER TABLE settings ADD COLUMN IF NOT EXISTS knockout_size int;
+    ALTER TABLE settings ADD COLUMN IF NOT EXISTS onboarding_done boolean NOT NULL DEFAULT false;
     ALTER TABLE settings ADD COLUMN IF NOT EXISTS version bigint NOT NULL DEFAULT 1;
 
     CREATE TABLE IF NOT EXISTS teams(
-      id serial PRIMARY KEY,
-      name varchar(100) NOT NULL,
-      logo text,
-      group_name varchar(40),
-      disqualified boolean NOT NULL DEFAULT false,
-      is_demo boolean NOT NULL DEFAULT false,
-      rank_override int,
-      version bigint NOT NULL DEFAULT 1,
-      created_at timestamptz NOT NULL DEFAULT now(),
-      UNIQUE(name,is_demo)
+      id serial PRIMARY KEY,name varchar(100) NOT NULL,logo text,group_name varchar(40),
+      disqualified boolean NOT NULL DEFAULT false,is_demo boolean NOT NULL DEFAULT false,
+      rank_override int,version bigint NOT NULL DEFAULT 1,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(name,is_demo)
     );
     ALTER TABLE teams ADD COLUMN IF NOT EXISTS is_demo boolean NOT NULL DEFAULT false;
     ALTER TABLE teams ADD COLUMN IF NOT EXISTS rank_override int;
     ALTER TABLE teams ADD COLUMN IF NOT EXISTS version bigint NOT NULL DEFAULT 1;
 
     CREATE TABLE IF NOT EXISTS games(
-      id serial PRIMARY KEY,
-      group_name varchar(40),
-      phase varchar(20) NOT NULL DEFAULT 'group',
-      round_label varchar(80),
-      round_no int,
-      slot_no int,
-      series_key varchar(80),
-      series_game int,
+      id serial PRIMARY KEY,group_name varchar(40),phase varchar(20) NOT NULL DEFAULT 'group',round_label varchar(80),
+      round_no int,slot_no int,series_key varchar(80),series_game int,
       home_team_id int NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
       away_team_id int NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
-      winner_team_id int REFERENCES teams(id) ON DELETE SET NULL,
-      starts_at timestamptz,
-      venue varchar(100),
-      status varchar(20) NOT NULL DEFAULT 'scheduled',
-      is_demo boolean NOT NULL DEFAULT false,
-      version bigint NOT NULL DEFAULT 1,
+      winner_team_id int REFERENCES teams(id) ON DELETE SET NULL,starts_at timestamptz,venue varchar(100),
+      status varchar(20) NOT NULL DEFAULT 'scheduled',is_demo boolean NOT NULL DEFAULT false,version bigint NOT NULL DEFAULT 1,
       CHECK(home_team_id<>away_team_id)
     );
     ALTER TABLE games ADD COLUMN IF NOT EXISTS phase varchar(20) NOT NULL DEFAULT 'group';
@@ -80,41 +65,12 @@ export async function migrate() {
     ALTER TABLE games ADD COLUMN IF NOT EXISTS version bigint NOT NULL DEFAULT 1;
 
     CREATE TABLE IF NOT EXISTS sponsors(
-      id serial PRIMARY KEY,
-      name varchar(120) NOT NULL,
-      logo text,
-      url text,
-      sort_order int NOT NULL DEFAULT 0,
-      created_at timestamptz NOT NULL DEFAULT now()
+      id serial PRIMARY KEY,name varchar(120) NOT NULL,logo text,url text,sort_order int NOT NULL DEFAULT 0,created_at timestamptz NOT NULL DEFAULT now()
     );
-
     CREATE TABLE IF NOT EXISTS admin_locks(scope varchar(80) PRIMARY KEY,telegram_user_id bigint NOT NULL,expires_at timestamptz NOT NULL);
     CREATE TABLE IF NOT EXISTS audit_log(id bigserial PRIMARY KEY,telegram_user_id bigint NOT NULL,action text NOT NULL,details jsonb NOT NULL DEFAULT '{}'::jsonb,created_at timestamptz NOT NULL DEFAULT now());
   `);
 }
-
-export async function audit(userId, action, details = {}) {
-  await db.query('INSERT INTO audit_log(telegram_user_id,action,details) VALUES($1,$2,$3)', [userId, action, details]);
-}
-
-export async function acquireLock(scope, userId, ttl = 180) {
-  const c = await db.connect();
-  try {
-    await c.query('BEGIN');
-    await c.query('DELETE FROM admin_locks WHERE expires_at<now()');
-    const x = (await c.query('SELECT telegram_user_id FROM admin_locks WHERE scope=$1 FOR UPDATE', [scope])).rows[0];
-    if (x && String(x.telegram_user_id) !== String(userId)) {
-      await c.query('ROLLBACK');
-      return { ok: false };
-    }
-    await c.query(`INSERT INTO admin_locks(scope,telegram_user_id,expires_at)
-      VALUES($1,$2,now()+($3||' seconds')::interval)
-      ON CONFLICT(scope) DO UPDATE SET telegram_user_id=EXCLUDED.telegram_user_id,expires_at=EXCLUDED.expires_at`, [scope, userId, ttl]);
-    await c.query('COMMIT');
-    return { ok: true };
-  } finally { c.release(); }
-}
-
-export async function releaseLock(scope, userId) {
-  await db.query('DELETE FROM admin_locks WHERE scope=$1 AND telegram_user_id=$2', [scope, userId]);
-}
+export async function audit(userId,action,details={}){await db.query('INSERT INTO audit_log(telegram_user_id,action,details) VALUES($1,$2,$3)',[userId,action,details])}
+export async function acquireLock(scope,userId,ttl=180){const c=await db.connect();try{await c.query('BEGIN');await c.query('DELETE FROM admin_locks WHERE expires_at<now()');const x=(await c.query('SELECT telegram_user_id FROM admin_locks WHERE scope=$1 FOR UPDATE',[scope])).rows[0];if(x&&String(x.telegram_user_id)!==String(userId)){await c.query('ROLLBACK');return{ok:false}}await c.query(`INSERT INTO admin_locks(scope,telegram_user_id,expires_at) VALUES($1,$2,now()+($3||' seconds')::interval) ON CONFLICT(scope) DO UPDATE SET telegram_user_id=EXCLUDED.telegram_user_id,expires_at=EXCLUDED.expires_at`,[scope,userId,ttl]);await c.query('COMMIT');return{ok:true}}finally{c.release()}}
+export async function releaseLock(scope,userId){await db.query('DELETE FROM admin_locks WHERE scope=$1 AND telegram_user_id=$2',[scope,userId])}
