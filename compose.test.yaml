@@ -1,0 +1,6 @@
+services:
+  app:
+    build: .
+    image: ftb:local-test
+    ports:
+      - "3000:3000"
