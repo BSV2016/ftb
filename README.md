@@ -1,354 +1,324 @@
 # FTB Tournament Platform
 
-FTB is a self-hosted tournament platform designed for Flunkyball by default. The sport name can be changed during onboarding, so the project can also be used for other simple win/loss team tournaments.
+FTB ist eine selbst gehostete Turnierplattform, die standardmäßig auf Flunkyball ausgelegt ist. Die Sportart kann im Onboarding geändert werden, daher eignet sich das Projekt auch für andere einfache Turnierformate mit Sieg/Niederlage-Wertung.
 
-The public website is read-only. Tournament administration happens through a Telegram bot. This keeps the public attack surface small and avoids maintaining a separate website login system.
+Die öffentliche Webseite ist rein lesend. Die komplette Administration erfolgt über einen Telegram-Bot. Dadurch ist auf der Homepage kein eigener Admin-Login notwendig.
 
-## Features
+## Interaktives Mock-up
 
-### Public tournament website
+Eine statische Demo zeigt die Bedienung des Telegram-Bots und die Auswirkungen direkt auf einer simulierten Turnierhomepage.
 
-- Mobile-first public homepage
-- Configurable event title, logo and sport name
-- Up to three configurable club or event colors
-- Automatic contrast checks to protect readability
-- Highlighted scrolling announcement banner for important information
-- Team overview with optional logos
-- Groups and standings
-- Match schedule and knockout phase
-- Rules section
-- Clearly marked disqualified teams
-- Tournament winner banner with victory animation
-- Reduced-motion support for visitors who disable animations
-- Downloadable tournament PDF
+**[Interaktives FTB Mock-up öffnen](https://bsv2016.github.io/ftb/)**
 
-### Telegram administration
+Hinweis: Der Link funktioniert, sobald der GitHub-Pages-Workflow nach dem Merge aktiviert und erfolgreich ausgeführt wurde. Das Mock-up enthält keine echten Telegram-Zugangsdaten, keine Datenbank und keine produktiven Admin-Funktionen.
 
-Administrators are allowed by numeric Telegram user ID. The bot is intended to run only in private chats.
+## Funktionen
 
-The bot can:
+### Öffentliche Turnierseite
 
-- Run the initial event onboarding
-- Configure title, sport, logo and colors
-- Maintain the rules
-- Publish or disable the scrolling announcement banner
-- Create teams with optional logos
-- Assign teams to groups manually
-- Reassign teams later
-- Randomly and evenly distribute teams across groups
-- Mark teams as disqualified
-- Maintain matches
-- Mark a match as running or cancelled
-- Record a winner with one tap
-- Generate a recommended knockout phase
-- Choose between a single final and a best-of-three final series
-- Create and delete demo data
+- für Smartphones optimierte Homepage
+- frei wählbarer Veranstaltungstitel und Sportart
+- Veranstaltungslogo
+- bis zu drei Vereins- oder Veranstaltungsfarben
+- automatische Kontrastprüfung für gute Lesbarkeit
+- farblich hervorgehobenes Laufbanner für wichtige Meldungen
+- Teamübersicht mit optionalen Logos
+- Gruppen und Tabellen
+- Spielplan und K.-o.-Phase
+- Regelwerk
+- sichtbare Kennzeichnung disqualifizierter Teams
+- Siegeranzeige mit Animation nach Turnierende
+- Berücksichtigung von `prefers-reduced-motion`
+- PDF-Download des Turniers
 
-### Flunkyball standings
+### Administration über Telegram
 
-FTB uses a pure win/loss model by default.
+Administratoren werden anhand ihrer numerischen Telegram-User-ID zugelassen. Der Bot ist für private Chats vorgesehen.
 
-Group tables contain:
+Über den Bot können Administratoren:
 
-- Place
+- das initiale Onboarding durchführen
+- Titel, Sportart, Logo und Farben einstellen
+- das Regelwerk pflegen
+- das Laufbanner setzen oder deaktivieren
+- Teams mit optionalem Logo anlegen
+- Teams manuell Gruppen zuweisen
+- Gruppenzuordnungen nachträglich ändern
+- Teams automatisch und möglichst gleichmäßig auf Gruppen verteilen
+- Teams disqualifizieren
+- Spiele verwalten
+- Spiele als laufend oder abgesagt markieren
+- den Sieger eines Spiels per Button auswählen
+- eine passende K.-o.-Phase automatisch berechnen lassen
+- das Finale als Einzelspiel oder Best of Three festlegen
+- Testdaten erzeugen und gezielt wieder löschen
+
+## Wertung
+
+FTB verwendet standardmäßig eine reine Sieg/Niederlage-Wertung.
+
+Die Gruppentabellen enthalten:
+
+- Platz
 - Team
-- Matches played
-- Wins
-- Losses
+- Spiele
+- Siege
+- Niederlagen
 
-Ranking is based on the number of wins. If teams are tied, the direct encounter is considered first. Disqualified teams remain visible but are removed from regular qualification calculations.
+Die Sortierung erfolgt primär nach Siegen. Bei Gleichstand wird zuerst der direkte Vergleich berücksichtigt. Disqualifizierte Teams bleiben sichtbar, werden aber aus der regulären Qualifikation ausgeschlossen.
 
-### Automatic knockout recommendation
+## Automatische K.-o.-Phase
 
-FTB calculates a suitable knockout size from the number of active teams. It selects a power-of-two bracket such as 4, 8, 16 or 32 teams while trying to keep the knockout phase meaningful relative to the size of the tournament.
+FTB berechnet aus der Anzahl der aktiven Teams eine sinnvolle K.-o.-Größe wie 4, 8, 16 oder 32 Teilnehmer.
 
-Qualification is distributed as evenly as possible between groups. Remaining wildcard places are assigned to the best next-ranked teams. Pairing also tries to avoid an immediate rematch between teams from the same preliminary group.
+Die Qualifikationsplätze werden möglichst gleichmäßig über die Gruppen verteilt. Verbleibende Plätze werden an die besten nächstplatzierten Teams vergeben. Bei der Erstellung der Paarungen versucht das System außerdem, direkte Wiederholungen aus derselben Vorrundengruppe zu vermeiden.
 
-Before generating the bracket, the Telegram bot shows the recommendation and asks how the final should be played.
+Vor dem Erzeugen des Spielbaums zeigt der Telegram-Bot die Empfehlung an und fragt nach dem Finalmodus:
 
-Final modes:
+- ein Entscheidungsspiel
+- Best of Three, erstes Team mit zwei Siegen gewinnt
 
-- Single deciding match
-- Best of Three, first team to two wins
+Beim Best-of-Three wird ein drittes Finalspiel nur erzeugt, wenn es benötigt wird.
 
-In Best of Three mode, a third final is created only when necessary.
+## Testdaten
 
-### Demo mode
+Organisatoren können vor dem echten Turnier Beispielteams und Beispielspiele anlegen lassen.
 
-Organizers can populate the site with sample teams and sample matches before the real tournament.
+Testdaten werden eindeutig gekennzeichnet. Die Funktion `Testdaten löschen` entfernt ausschließlich Testteams und Testspiele. Erhalten bleiben:
 
-Demo records are explicitly marked. The Telegram action `Testdaten löschen` removes only demo teams and demo matches. It does not remove:
+- Seitentitel
+- Sportart
+- Farben
+- Veranstaltungslogo
+- Regelwerk
+- Laufbanner
+- echte Teams
+- echte Spiele
 
-- Site title
-- Sport name
-- Branding colors
-- Event logo
-- Rules
-- Announcement banner
-- Real teams
-- Real matches
+Testdaten werden nicht in das finale Turnier-PDF übernommen.
 
-Demo data is excluded from the final tournament PDF.
+## Schutz vor gleichzeitiger Bearbeitung
 
-### Concurrent administrator protection
+Kritische Bot-Abläufe verwenden kurzlebige Datenbanksperren. Wenn zwei Administratoren denselben Bereich gleichzeitig bearbeiten wollen, erhält der zweite Administrator eine Warnung.
 
-FTB protects sensitive bot workflows with short-lived database locks. If two administrators try to edit the same area at the same time, the second administrator receives a warning.
+Spieländerungen verwenden zusätzlich Versionsnummern. Eine veraltete Aktion kann dadurch kein neueres Ergebnis unbemerkt überschreiben.
 
-Match updates additionally use row versions. A stale Telegram action therefore cannot silently overwrite a newer result.
+## PDF-Export
 
-### PDF export
+Unter `/turnier.pdf` erzeugt die Anwendung ein aktuelles PDF mit den echten Turnierdaten, unter anderem:
 
-The public `/turnier.pdf` endpoint creates a current tournament document containing real tournament data, including:
-
-- Event information
-- Group tables
+- Veranstaltungsinformationen
+- Gruppentabellen
 - Teams
-- Wins and losses
-- Match schedule
-- Results
-- Knockout bracket information
-- Tournament winner
+- Siege und Niederlagen
+- Spielplan
+- Ergebnisse
+- K.-o.-Informationen
+- Turniersieger
 
-## Architecture
-
-Typical self-hosted setup:
+## Architektur
 
 ```text
 Internet
    |
 Domain / HTTPS
    |
-Reverse proxy or Pangolin
+Reverse Proxy oder Pangolin
    |
-Docker host
+Docker-Host
    |
-   +-- FTB application
+   +-- FTB Anwendung
    +-- PostgreSQL
-   +-- Telegram bot, running inside the application service
+   +-- Telegram-Bot innerhalb des App-Services
 ```
 
-The PostgreSQL service has no published host port in the provided Compose setup.
+PostgreSQL veröffentlicht im mitgelieferten Compose-Setup keinen Host-Port.
 
-## Requirements
+## Voraussetzungen
 
-For the standard Docker deployment you need:
+Für das Standard-Deployment benötigst du:
 
-- A machine capable of running Docker
-- Docker Engine and Docker Compose
-- A Telegram bot token from BotFather
-- The numeric Telegram user IDs of the administrators
-- HTTPS access to the application for public use
+- einen Rechner oder Server mit Docker
+- Docker Engine und Docker Compose
+- einen Telegram-Bot-Token von BotFather
+- die numerischen Telegram-User-IDs der Administratoren
+- für öffentliche Nutzung einen HTTPS-Zugang zur Anwendung
 
-Dockge is optional. The provided `compose.yaml` can be used directly with Docker Compose or managed as a Dockge stack.
+Dockge ist optional. Die vorhandene `compose.yaml` kann direkt mit Docker Compose oder als Dockge-Stack verwendet werden.
 
-## Self-hosting with Docker and Dockge
+## Self-Hosting mit Docker
 
-### 1. Get the project
-
-Clone the repository:
+### 1. Repository klonen
 
 ```bash
 git clone https://github.com/BSV2016/ftb.git
 cd ftb
 ```
 
-Alternatively, use the container image from GHCR once the GitHub Actions workflow has built a release.
+### 2. Telegram-Bot anlegen
 
-### 2. Create a Telegram bot
+Öffne Telegram und starte einen Chat mit `@BotFather`.
 
-Open a chat with `@BotFather` in Telegram.
+Erstelle mit `/newbot` einen Bot und speichere den Token sicher. Der Token ist ein Geheimnis und gehört niemals ins Git-Repository.
 
-Create a bot with `/newbot` and save the token. Treat this token like a password.
+### 3. Telegram-IDs der Administratoren ermitteln
 
-### 3. Find the administrator Telegram IDs
+FTB verwendet numerische Telegram-User-IDs, keine Benutzernamen.
 
-FTB authorizes administrators using numeric Telegram user IDs rather than usernames.
-
-Add the permitted IDs to the environment configuration as a comma-separated list.
-
-Example:
+Beispiel:
 
 ```env
 TELEGRAM_ADMIN_IDS=123456789,987654321
 ```
 
-### 4. Create the environment file
-
-Copy the example:
+### 4. Umgebungsdatei erstellen
 
 ```bash
 cp .env.example .env
 ```
 
-Then edit `.env` and set at least:
+Danach mindestens diese Werte anpassen:
 
 ```env
-DB_PASSWORD=use-a-long-random-password
-TELEGRAM_BOT_TOKEN=your-bot-token
+DB_PASSWORD=ein-langes-zufaelliges-passwort
+TELEGRAM_BOT_TOKEN=dein-bot-token
 TELEGRAM_ADMIN_IDS=123456789
 ```
 
-Never commit `.env` to Git.
+Die Datei `.env` darf nicht committed werden.
 
-### 5. Start the stack with Docker Compose
+### 5. Stack starten
 
 ```bash
 docker compose pull
 docker compose up -d
 ```
 
-Check the status:
+Status prüfen:
 
 ```bash
 docker compose ps
 ```
 
-Check application logs if necessary:
+Logs anzeigen:
 
 ```bash
 docker compose logs -f app
 ```
 
-### 6. Deploy with Dockge instead
+### 6. Mit Dockge deployen
 
-In Dockge, create a new stack and use the repository `compose.yaml`.
+Erstelle in Dockge einen neuen Stack und verwende die `compose.yaml` dieses Repositories.
 
-Set the same environment variables in the stack environment or provide the `.env` file on the Docker host.
+Hinterlege die gleichen Umgebungsvariablen beziehungsweise eine `.env` auf dem Docker-Host und starte den Stack.
 
-Deploy the stack and verify that the application and database containers are healthy.
+### 7. HTTPS bereitstellen
 
-### 7. Put the site behind HTTPS
+Veröffentliche ausschließlich die FTB-Anwendung über einen vertrauenswürdigen HTTPS-Reverse-Proxy oder Tunnel. PostgreSQL bleibt intern.
 
-Do not expose PostgreSQL publicly.
+Mögliche Varianten:
 
-Expose only the FTB application through a trusted HTTPS reverse proxy.
-
-Possible options include:
-
-- Pangolin and Newt
+- Pangolin + Newt
 - Caddy
 - Traefik
 - Nginx Proxy Manager
 - Cloudflare Tunnel
 
-If you already use Pangolin on a VPS and Newt on the Docker host, point a Pangolin resource at the internal FTB web service.
+### 8. Telegram-Onboarding starten
 
-### 8. Start the Telegram onboarding
-
-Open a private chat with your new Telegram bot and send:
+Sende deinem Bot in einem privaten Chat:
 
 ```text
 /start
 ```
 
-Configure the event title, sport name, logo and colors. Then add the rules, teams and groups.
+Danach kannst du Branding, Regelwerk, Teams und Gruppen konfigurieren.
 
-### 9. Test before tournament day
+### 9. Vor dem Turnier testen
 
-Use the bot's demo-data function to populate the site.
+Nutze die Testdaten-Funktion und prüfe mindestens:
 
-Check at minimum:
+- Darstellung auf dem Smartphone
+- Farbkontraste
+- Teamlogos
+- Gruppentabellen
+- Ergebniseingabe
+- automatische K.-o.-Empfehlung
+- Best-of-Three-Finale
+- PDF-Download
+- Siegeranzeige
 
-- Mobile layout
-- Branding contrast
-- Team logos
-- Group tables
-- Telegram result entry
-- Knockout recommendation
-- PDF download
-- Winner display
+Lösche die Testdaten danach über den Bot.
 
-Delete the demo data when testing is complete.
+### 10. Backup erstellen
 
-### 10. Back up PostgreSQL
+Vor dem Turnier sollte ein PostgreSQL-Backup erstellt werden. Bewahre Backups außerhalb des Docker-Volumes auf.
 
-Before tournament day, create a database backup or back up the PostgreSQL Docker volume.
+## Aktualisieren
 
-A database dump can be created with `pg_dump` from the database container. Store backups outside the Docker volume itself.
-
-## Updating
-
-If the stack uses GHCR images:
+Bei Nutzung der GHCR-Images:
 
 ```bash
 docker compose pull
 docker compose up -d
 ```
 
-With Dockge, use the stack update or pull-and-redeploy function.
+Für echte Turniere sind versionierte Image-Tags besser als ausschließlich `latest`, da ein Rollback dadurch einfacher wird.
 
-For important events, prefer versioned image tags instead of relying only on `latest`. This makes rollback easier.
+## Hosting ohne eigene Domain oder VPS
 
-## Hosting without your own domain or VPS
+Eine eigene Domain und ein VPS sind nicht zwingend notwendig.
 
-A paid domain and a VPS are useful, but they are not mandatory.
+### Cloudflare Tunnel
 
-### Option 1: Cloudflare Tunnel
+Ein Cloudflare Tunnel kann einen Dienst vom Heimserver veröffentlichen, ohne eingehende Ports im Router freizugeben.
 
-A Cloudflare Tunnel can publish the Docker application without opening inbound ports on the home router.
+### Tailscale Funnel
 
-This is a good option when the application runs on a home server but no VPS is available.
+Für Tests oder kleinere Veranstaltungen kann Tailscale Funnel einen lokalen Dienst über eine von Tailscale verwaltete HTTPS-Adresse verfügbar machen.
 
-A custom domain is normally the cleanest setup, but Cloudflare-managed tunnel hostnames can also help during testing depending on the selected Cloudflare product and configuration.
+### Container-Hosting
 
-### Option 2: Tailscale Funnel
+FTB benötigt einen laufenden App-Container und PostgreSQL. Geeignet sind deshalb Hosting-Anbieter, die Docker oder Container sowie eine persistente PostgreSQL-Datenbank anbieten.
 
-For small events or testing, Tailscale Funnel can publish a local service through a Tailscale-managed HTTPS address. This avoids operating your own reverse-proxy VPS.
+### GitHub
 
-Check current Tailscale limits and terms before using it for a public tournament with many visitors.
+GitHub eignet sich für:
 
-### Option 3: Hosting platforms with Docker support
+- Quellcode
+- Pull Requests und Versionsverwaltung
+- GitHub Actions für Builds und Tests
+- GitHub Container Registry für Docker-Images
+- GitHub Pages für das statische Mock-up
 
-FTB needs an application service and persistent PostgreSQL storage. Platforms that can run Docker containers plus PostgreSQL can therefore host the project without a personal server.
+Die echte FTB-Anwendung kann nicht vollständig auf GitHub Pages laufen, da Pages nur statische Dateien ausliefert. Für die echte Anwendung werden Node.js, PostgreSQL und der laufende Telegram-Bot benötigt.
 
-Examples of platform categories to look for:
+## Sicherheit
 
-- Container hosting services
-- Platform-as-a-Service providers with Docker deployments
-- Managed PostgreSQL plus container runtime
+- PostgreSQL niemals direkt ins Internet veröffentlichen.
+- Telegram-Bot-Token niemals committen.
+- `.env` nicht ins Repository aufnehmen.
+- nur numerische Telegram-IDs erlaubter Administratoren hinterlegen.
+- HTTPS verwenden.
+- starke zufällige Datenbankpasswörter einsetzen.
+- Docker-Host und Images aktuell halten.
+- Dockge und den Docker-Host selbst nicht öffentlich zugänglich machen.
+- keine unnötigen Container-Rechte vergeben.
+- vor jedem Turnier die Admin-Liste kontrollieren.
+- einen offengelegten Telegram-Token sofort bei BotFather widerrufen und ersetzen.
 
-Verify persistent storage, pricing, sleeping or idle policies and outbound Telegram access before tournament day.
+## Entwicklungsstand
 
-### Option 4: GitHub for source and images, external runtime for the app
+FTB befindet sich noch in aktiver Entwicklung. Vor einem echten Turnier sollte der komplette Ablauf mit Testdaten geprüft werden.
 
-GitHub can host the project source and GitHub Container Registry can host the built Docker image.
+---
 
-GitHub Pages alone cannot run FTB because GitHub Pages only serves static websites. FTB requires a running Node.js service, PostgreSQL and the Telegram bot.
+## English summary
 
-A practical low-maintenance setup is therefore:
+FTB is a self-hosted tournament platform built primarily for Flunkyball and other simple win/loss team tournaments. It provides a public mobile-first tournament website and Telegram-based administration without a public admin login.
 
-```text
-GitHub repository
-   |
-GitHub Actions
-   |
-GHCR Docker image
-   |
-Container hosting provider
-   |
-Managed PostgreSQL
-```
+Main features include configurable branding, teams and logos, automatic or manual group assignment, win/loss standings, disqualification, automatic knockout recommendations, single-game or best-of-three finals, demo data, concurrent-admin protection, winner animations and PDF export.
 
-### Option 5: Temporary local hosting for testing
+The real application requires Docker, PostgreSQL and a Telegram bot. GitHub Pages hosts only the static interactive mock-up.
 
-For development or a private test, run FTB on a laptop or home computer and expose it temporarily with a secure tunnel service.
-
-Do not depend on an untested temporary tunnel for the first time on tournament day. Test reconnect behavior, HTTPS and expected visitor load beforehand.
-
-## Security recommendations
-
-- Never expose the PostgreSQL port to the internet.
-- Keep the Telegram bot token out of Git.
-- Use only numeric Telegram IDs in the administrator allowlist.
-- Keep Docker images and the host operating system updated.
-- Use HTTPS for the public site.
-- Use strong random database passwords.
-- Keep database backups outside the Docker host where possible.
-- Restrict access to Dockge and the Docker host itself.
-- Do not give the application container privileged mode or unnecessary Linux capabilities.
-- Review administrators before every tournament.
-- Rotate the Telegram token immediately if it is ever exposed.
-
-## Development status
-
-FTB is currently under active development. Before using it for a real tournament, test the complete workflow with demo data and verify the generated schedule, standings, qualification logic, final mode and PDF output for your tournament format.
+**[Open the interactive mock-up](https://bsv2016.github.io/ftb/)**
